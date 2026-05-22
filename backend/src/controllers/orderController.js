@@ -1,26 +1,32 @@
 const orderService = require('../services/orderService');
 
 class OrderController {
-  async createOrder(req, res, next) {
+  async create(req, res, next) {
     try {
       const { seatId, quantity } = req.body;
-      
-      // Ambil userId dari JWT Token yang sudah didecode oleh middleware
-      const userId = req.user.id; 
+      const userId = req.user.id;
 
-      if (!seatId || !quantity) {
-        return res.status(400).json({ message: "Seat ID dan Quantity wajib diisi!" });
-      }
+      const order = await orderService.createOrder(userId, seatId, quantity);
 
-      // Jalankan logika bisnis di service
-      const order = await orderService.checkoutTicket(userId, seatId, quantity);
-
-      return res.status(201).json({
+      res.status(201).json({
         success: true,
         message: "Pemesanan tiket berhasil!",
         data: order
       });
+    } catch (error) {
+      next(error);
+    }
+  }
 
+  async getUserOrders(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const orders = await orderService.getUserOrders(userId);
+
+      res.status(200).json({
+        success: true,
+        data: orders
+      });
     } catch (error) {
       next(error);
     }

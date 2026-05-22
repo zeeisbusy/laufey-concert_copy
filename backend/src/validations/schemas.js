@@ -1,0 +1,20 @@
+const { z } = require('zod');
+
+const authSchema = z.object({
+  body: z.object({
+    email: z.string().email('Format email tidak valid'),
+    password: z.string().min(6, 'Password minimal 6 karakter'),
+  }),
+});
+
+const orderSchema = z.object({
+  body: z.object({
+    seatId: z.number().int().positive('ID Kursi harus valid'),
+    quantity: z.number().int().min(1, 'Minimal pembelian 1 tiket').max(8, 'Maksimal pembelian 8 tiket'),
+  }),
+});
+
+module.exports = {
+  authSchema,
+  orderSchema,
+};

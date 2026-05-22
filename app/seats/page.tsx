@@ -97,8 +97,8 @@ export default function SeatsPage() {
     const params = new URLSearchParams()
     // Map selected seats to their database seat IDs
     const seatsToOrder = selectedSeats.map(s => {
-      const seatInfo = event.seats.find((es: any) => es.type === s.category)
-      return { ...s, dbId: seatInfo.id, price: seatInfo.price }
+      const seatInfo = event?.seats.find((es: any) => es.type === s.category)
+      return { ...s, dbId: seatInfo?.id, price: seatInfo?.price || 0 }
     })
     
     params.set('seats', JSON.stringify(seatsToOrder))
@@ -181,7 +181,9 @@ export default function SeatsPage() {
                 <p className="font-mono text-[10px] tracking-[0.4em] text-gold/60 mb-4">TIKET DIPILIH</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {selectedSeats.map(seat => {
-                    const catInfo = event.seats.find((s: any) => s.type === seat.category)
+                    const catInfo = event?.seats.find((s: any) => s.type === seat.category)
+                    if (!catInfo) return null
+                    
                     return (
                       <div key={seat.id} className="flex items-center justify-between py-2 border-b border-white/5">
                         <div className="flex items-center gap-2">

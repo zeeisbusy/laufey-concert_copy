@@ -1,22 +1,34 @@
 const orderRepository = require('../repositories/orderRepository');
+const eventRepository = require('../repositories/eventRepository');
+const AppError = require('../middlewares/errorMiddleware');
 
 class OrderService {
-  async checkoutTicket(userId, seatId, quantity) {
-    // 1. Cari tahu dulu tiket yang mau dibeli ada atau tidak
-    const seat = await orderRepository.findSeatById(seatId);
+  async createOrder(userId, seatId, quantity) {
+    // 1. Cek ketersediaan kursi
+    const seat = await eventRepository.findSeatById(seatId);
     if (!seat) {
-      throw { status: 404, message: "Kategori tiket tidak ditemukan!" };
+      throw new AppError('Kursi tidak ditemukan!', 404);
     }
 
-    // 2. VALIDASI UTAMA: Jika stok tidak cukup, lempar error status 400
     if (seat.stock < quantity) {
-      throw { status: 400, message: "Maaf banget, kategori tiket ini sudah habis!" };
+      throw new AppError(`Maaf, stok tiket habis atau tidak mencukupi. Sisa: ${seat.stock}`, 400);
     }
 
-    // 3. Jika aman, jalankan fungsi transaksi di repository
-    const [updatedSeat, newOrder] = await orderRepository.createOrderWithTransaction(userId, seatId, quantity);
-    
-    return newOrder;
+    // 2. Buat transaksi pesanan (Dalam real-world gunakan Prisma Transaction)
+    const order = await orderRepository.create({
+      userId,
+      seatId,
+      quantity
+    });
+
+    // 3. Update stok kursi
+    await eventRepository.updateSeatStock(seatId, seat.stock - quantity);
+
+    return order;
+  }
+
+  async getUserOrders(userId) {
+    return await orderRepository.findByUserId(userId);
   }
 }
 

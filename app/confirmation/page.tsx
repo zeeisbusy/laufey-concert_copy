@@ -17,7 +17,7 @@ const PAYMENT_LABELS: Record<string, string> = {
 
 interface OrderData {
   orderId: string
-  seats: SeatData[]
+  seats: (SeatData & { price: number })[]
   total: number
   grandTotal: number
   form: { name: string; email: string; phone: string; idNumber: string; address: string; city: string; province: string; postal: string }
@@ -110,14 +110,13 @@ function ConfirmationContent() {
                 <p className="font-mono text-[9px] tracking-widest text-cream/40 mb-3">TIKET YANG DIPESAN</p>
                 <div className="space-y-2 mb-4">
                   {order.seats.map(seat => {
-                    const cat = TICKET_CATEGORIES.find(c => c.category === seat.category)!
                     return (
                       <div key={seat.id} className="flex items-center justify-between py-2 border-b border-white/5">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full" style={{ background: CAT_COLORS[seat.category] }} />
                           <span className="font-mono text-xs text-cream">{seat.category}</span>
                         </div>
-                        <span className="font-body text-sm text-cream/70">{formatPrice(cat.price)}</span>
+                        <span className="font-body text-sm text-cream/70">{formatPrice(seat.price || 0)}</span>
                       </div>
                     )
                   })}
@@ -162,9 +161,19 @@ function ConfirmationContent() {
                   <span className="font-mono text-[9px] tracking-widest text-cream/40">METODE</span>
                   <span className="font-body text-sm text-cream/80">{PAYMENT_LABELS[order.paymentMethod]}</span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-gold/20">
+                <div className="pt-3 mt-3 border-t border-white/5 space-y-2">
+                  <div className="flex justify-between font-body text-cream/50 text-xs">
+                    <span>Subtotal ({order.seats.length} tiket)</span>
+                    <span>{formatPrice(order.total)}</span>
+                  </div>
+                  <div className="flex justify-between font-body text-cream/50 text-xs">
+                    <span>Biaya Layanan (5%)</span>
+                    <span>{formatPrice(order.grandTotal - order.total)}</span>
+                  </div>
+                </div>
+                <div className="flex justify-between pt-3 mt-1 border-t border-gold/20">
                   <span className="font-mono text-xs tracking-widest text-gold/60">TOTAL BAYAR</span>
-                  <span className="font-display text-xl text-cream">{formatPrice(order.grandTotal)}</span>
+                  <span className="font-display text-2xl text-cream">{formatPrice(order.grandTotal)}</span>
                 </div>
               </div>
             </div>
