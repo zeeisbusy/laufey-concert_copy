@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String  // Wajib ada untuk syarat autentikasi (nanti di-hash)
+  orders   Order[] // 1 User bisa punya banyak Order
+}
+
+model Event {
+  id       Int     @id @default(autoincrement())
+  title    String
+  location String
+  seats    Seat[]  // 1 Event punya banyak tipe Seat
+}
+
+model Seat {
+  id       Int     @id @default(autoincrement())
+  eventId  Int
+  type     String  // Contoh: "VVIP", "VIP", "Festival"
+  price    Float
+  stock    Int     // Penting untuk validasi jika tiket habis (status 400)
+  event    Event   @relation(fields: [eventId], references: [id])
+  orders   Order[] // Relasi ke Order
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  seatId    Int
+  quantity  Int      // Jumlah tiket yang dibeli
+  status    String   @default("PENDING")
+  
+  // Relasi ke User dan Seat
+  user      User     @relation(fields: [userId], references: [id])
+  seat      Seat     @relation(fields: [seatId], references: [id])
+}

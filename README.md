@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Laufey Concert - Booking System
 
-## Getting Started
+Dokumentasi ini berisi panduan untuk menjalankan aplikasi Laufey Concert yang terdiri dari frontend (Next.js) dan backend (Express.js + Prisma).
 
-First, run the development server:
+## Prasyarat
+Sebelum memulai, pastikan Anda sudah menginstal:
+- [Node.js](https://nodejs.org/) (v18 ke atas)
+- [PostgreSQL](https://www.postgresql.org/) (sudah terinstal dan sedang berjalan)
 
+## Struktur Proyek
+- `/` - Direktori utama untuk **Frontend** (Next.js)
+- `/backend` - Direktori untuk **Backend** (Express.js, Prisma, PostgreSQL)
+
+---
+
+## Langkah Persiapan
+
+### 1. Konfigurasi Database (Backend)
+Masuk ke direktori `backend` dan buat file `.env` untuk menyimpan konfigurasi sensitif.
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd backend
+touch .env
+```
+Isi file `.env` dengan format berikut:
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/DATABASE_NAME?schema=public"
+JWT_SECRET="masukkan_kode_secret_anda_bebas"
+```
+*Ganti `USER`, `PASSWORD`, dan `DATABASE_NAME` sesuai dengan konfigurasi PostgreSQL lokal Anda.*
+
+### 2. Instalasi Dependensi
+
+**Instalasi di Backend:**
+```bash
+cd backend
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Instalasi di Frontend:**
+```bash
+# Kembali ke direktori root
+cd ..
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Setup Database & Seeding (Backend)
+Jalankan perintah berikut di dalam direktori `backend` untuk melakukan sinkronisasi database dan mengisi data awal (event & seats):
+```bash
+cd backend
+npx prisma migrate dev --name init
+node prisma/seed.js
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Cara Menjalankan Aplikasi
 
-To learn more about Next.js, take a look at the following resources:
+### Menjalankan Backend
+Backend harus dijalankan agar frontend dapat mengakses API. Backend akan berjalan di port `3001`.
+```bash
+cd backend
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Menjalankan Frontend
+Jalankan frontend di terminal baru dari direktori root. Frontend akan berjalan di port `3000`.
+```bash
+# Dari root direktori
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Akses Aplikasi
+- **Frontend:** [http://localhost:3000](http://localhost:3000)
+- **Backend API:** [http://localhost:3001/api](http://localhost:3001/api)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Catatan Penting
+- **Urutan Menjalankan:** Pastikan backend sudah berjalan (`npm run dev` di folder backend) sebelum Anda mencoba fitur Login atau Booking di Frontend.
+- **Data Awal:** Jika Anda tidak menjalankan `node prisma/seed.js`, halaman pemilihan kursi mungkin akan kosong karena tidak ada data event dan kategori kursi di database.
+- **Port:** Frontend dikonfigurasi untuk menghubungi backend di `http://localhost:3001`. Jika Anda mengubah port backend, pastikan untuk menyesuaikan `lib/api.ts` di folder frontend.
